@@ -4,7 +4,7 @@ My personal blog where I share some of the things that I've learned, mostly rela
 
 ---
 
-| topics | date | title |
+| Topics | Date | Title |
 |:-------|:-----|:------|
 | Raspberry Pi, Wardriving | 2023-06-24 | [Raspberry Pi Wardriving Build](https://jlant13.github.io/posts/raspberry-pi-wardriving/) |
 | Jekyll | 2023-05-05 | [Building This Blog](https://jlant13.github.io/posts/building-this-blog/) |
