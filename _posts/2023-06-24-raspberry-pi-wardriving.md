@@ -1,6 +1,6 @@
 ---
 title: Raspberry Pi Wardriving Build
-date: 2023-06-15 12:00:00 -0800 
+date: 2023-06-24 12:00:00 -0800 
 categories: [Guide]
 tags: [raspberry-pi,hacking]
 img_path: /assets/img/posts/raspberry-pi-wardriving
