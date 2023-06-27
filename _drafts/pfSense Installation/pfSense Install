@@ -1,0 +1,237 @@
+PFSENSE INSTALLATION 
+
+    Sections
+        Basic overview of installation 
+            Download ISO
+            Upload ISO to local storage on Proxmox
+            vm101: Eunomia-pfSense 
+            Disk: 32gb      # -io thread: [x]
+            Cores: 4        # -aes: ON
+            Memory: 4096mb
+            Network: vmbr0  # firewall: []
+                     vmbr1  # firewall: []
+
+            Boot VM
+                Accept
+                Install pfSense 
+                Default Keymap
+                Auto (ZFS)
+                Reboot
+            Config VLANs
+                # Upon reboot, you will be asked to configure VLANs, type 'y' for yes
+                vtnet1 > VLAN Tag 5
+                vtnet1 > VLAN Tag 10
+                vtnet1 > VLAN Tag 80
+                vtnet1 > VLAN Tag 666
+            Assign Interfaces 
+                # Following configuring VLANs, you will be asked to assign interfaces 
+                vtnet0: WAN
+                vtnet1: LAN
+                vtnet1.5: OPT1
+                vtnet1.10: OPT2
+                vtnet1.80: OPT3
+                vtnet1.666: OPT4
+            Set Interface IP Addresses 
+                # At main console menu, enter '2' to set interface IP addresses
+                Select Interface
+                Enter desired IP address with subnet    #x.x.x.x/x
+                Set to LAN                              # just press enter
+                IPv6 on/off                             # disabled, just press enter
+                Enable DHCP server                      # y
+                Start of IP address range
+                End of IP address range 
+                Revert to HTTP web client               # n
+                Repeat for all interfaces except for WAN 
+                    LAN: 10.13.0.1/24      10.13.0.10-10.13.0.250
+                    OPT1: 10.13.5.1/24     10.13.5.10-10.13.5.250
+                    OPT2: 10.13.10.1/24    10.13.10.10-10.13.10.250
+                    OPT3: 10.13.80.1/24    10.13.80.10-10.13.80.250
+                    OPT4: 10.16.66.1/24    10.16.66.10-10.16.66.250
+                # Left space on each interface to have some statically assigned clients if needed/wanted
+            Configure from WAN 
+                # Temporarily disable the firewall to access pfSense from a device on your main LAN, or another VM in your proxmox server
+                # At main console menu, enter '8' to open a shell 
+                    pfctl -d    # disables the firewall temporarily
+                Open browser to WAN IP address 
+                Login in with default credentials 
+                    admin/pfsense 
+            Wizard Setup
+                # Go through the setup to finalize any changes
+                Hostname: Eunomia
+                Domain: sec.lab
+                DNS Servers:            # Leave blank to use home router's DNS settings
+                Override DNS: [x]
+                
+                Time Server Hostname:   # Leave to default
+                Time Zone:              # Set to your time zone 
+                
+                Configure WAN Interface: DHCP 
+                DHCP Hostname: Eunomia 
+                Block RFC1918 Private Networks: [ ]     # Leave unchecked, as we want to allow private IP addresses through to the WAN interface.
+
+                Configure LAN Interface:                # No changes should be necessary as we already set the LAN interface
+
+                Set Admin Password:     # Atotallysecretpassword  Elab0rate-Structure$1013
+                
+                Reboot
+            Assign Static IP Address
+                # On proxmox, under the Hardware tab, take note of the MAC address of net0
+                OPNsense 
+                    Login to home router
+                    Services > DHCPv4 > Leases
+                    Find the IP address that has the MAC address of the pfSense VM
+                    Click '+' to add static mapping
+                    Enter desired IP address 
+            Adding WAN Firewall Rule for access 
+                Firewall > Rules > WAN 
+                Add Rule to top of list
+                    Action: Pass
+                    Interface: WAN 
+                    Address Family: IPv4
+                    Protocol: TCP
+                    Source: WAN net
+                    Destination: This Firewall (self)
+                    Destination Port Range: HTTPS-HTTPS 
+                    Description: Allow WAN access to WebUI
+            Disable Hardware Checksum Offloading
+                System > Advanced > Networking 
+                    Disable Hardware Checksum Offloading: [x]
+                Reboot 
+                # Checksum offloading is broken in some hardware, particularly Realtek cards and virtualized/emulated cards such as those on Xen/KVM. 
+                # Typical symptoms of broken checksum offloading include corrupted packets and poor throughput performance.
+            Rename Interfaces 
+                Interfaces > OPT1
+                    Description: ADLab
+                Interfaces > OPT2 
+                    Description: ICSLab
+                Interfaces > OPT3 
+                    Description: Egress 
+                Interfaces > OPT4
+                    Description: Isolated 
+            Create Firewall Interfaces 
+                Firewall > Aliases > IP
+                    Name: RFC1918
+                    Description: Private IPv4 Address Spaces
+                    Type: Network(s)
+                        10.0.0.0/8
+                        172.16.0.0/12
+                        192.168.0.0/16
+                        169.254.0.0/16
+                        127.0.0.0/8
+
+                    Name: Hades
+                    Description: Hades-Kali
+                    Type: Host
+                    IP: 10.13.0.2       # or set to IP of existing Kali instance, might have to do this step after static routes are already setup
+            Create Firewall Rules 
+                # Can wait until all rules are created to Apply Changes
+                Allow Home Network to Internal LAN
+                    # We want to allow our home network to reach the LAN where Kali is going to sit. 
+                    # That way you can ssh or open a remote desktop to your Kali VM.
+                    Firewall > Rules > WAN 
+                        Action: Pass
+                        Interface: WAN
+                        Address Family: IPv4 
+                        Protocol: Any
+                        Source: WAN net 
+                        Destination: LAN net 
+                        Description: Allow Home Network to Internal LAN
+
+                        Action: Block
+                        Interface: WAN
+                        Address Family: IPv4+IPv6
+                        Protocol: Any
+                        Source: Any
+                        Destination: EGRESS net
+                        Description: Block All WAN Access to EGRESS LAN
+
+                        Action: Block
+                        Interface: WAN
+                        Address Family: IPv4+IPv6
+                        Protocol: Any
+                        Source: Any 
+                        Destination: ISOLATED net
+                        Description: Block All WAN Access to ISOLATED LAN 
+
+                    Firewall > Rules > EGRESS
+                        Action: Pass
+                        Interface: EGRESS
+                        Address Family: IPv4 
+                        Protocol: Any 
+                        Source: EGRESS net
+                        Destination: EGRESS address 
+                        Description: Allow Packets to Local Gateway 
+
+                        Action: Pass
+                        Interface: EGRESS
+                        Address Family: IPv4
+                        Protocol: Any
+                        Source: EGRESS net 
+                        Destination: Single host        # or host: Hades 
+                        Description: Allow Packets to Kali VM
+                        
+                        Action: Pass
+                        Interface: EGRESS
+                        Address Family: IPv4
+                        Protocol: Any
+                        Source: EGRESS net
+                        Destination: [x] Invert Match   Single host or alias -> RFC1918
+                        Description: Allow to Any Non-Private Addresses
+
+                        Action: Block
+                        Interface: EGRESS
+                        Address Family: IPv4+IPv6
+                        Protocol: Any
+                        Source: Any
+                        Destination: Any
+                        Description: Block Everything Else 
+
+                    Firewall > Rules > ISOLATED 
+                        Action: Pass
+                        Interface: ISOLATED
+                        Address Family: IPv4
+                        Protocol: Any
+                        Source: ISOLATED net
+                        Destination: Single host or alias -> Hades
+                        Description: Allow ISOLATED LAN to Hades
+
+                        Action: Block
+                        Interface: ISOLATED
+                        Address Family: IPv4+IPv6
+                        Protocol: Any
+                        Source: Any
+                        Destination: Any
+                        Description: Block Everything Else
+                
+                Configure DNS Revolver
+                    Services > DNS Revolver > General Settings
+                        DHCP Registration: [x]
+                        Static DHCP: [x]
+                    Services > DNS Resolver > Advanced Settings 
+                        Prefetch Support: [x]
+                        Prefetch DNS Key Support: [x]
+                        Harden DNSSEC Data: [x]
+                        Serve Expired: [x]
+                        Message Cache Size: 10MB
+                    Apply Changes 
+                
+                Configure Static Routes
+                    # Login to home router
+                    # OPNsense 
+                        OPNsense > System > Gateway > Single 
+                            Name: Eunomia
+                            Description: Eunomia.sec.lab
+                            Interface: LAN
+                            Address Family: IPv4
+                            IP Address: 10.0.0.36
+                            Disable Gateway Monitoring: [ ]         # leave unchecked
+                        OPNsense > System > Routes > Configuration 
+                            Network Address: 10.13.0.0/24
+                            Gateway: Eunomia - 10.0.0.36            # should autofill 
+                            Description: Eunomia LAN
+                        Apply Changes
+                
+                        
+
+
+                            

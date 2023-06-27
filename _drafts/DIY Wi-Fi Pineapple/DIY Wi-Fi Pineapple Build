@@ -1,0 +1,103 @@
+https://github.com/xchwarze/wifi-pineapple-cloner
+
+## Hardware
+
+GL.iNet GL-AR750s-EXT
+
+## Software 
+
+Clean GL-AR750S 3.0 Firmware (OpenWrt 18.06.0) - https://fw.gl-inet.com/firmware/ar750s/clean/gl-ar750s-3.0-1011_clean.img
+GL-AR750S 3.105 Firmware (OpenWrt 18.06.0)
+OpenWrt v19.07.7 - https://downloads.openwrt.org/releases/19.07.7/targets/ar71xx/generic/openwrt-19.07.7-ar71xx-generic-gl-ar750s-squashfs-sysupgrade.bin
+Wi-Fi Pineapple Clone firmware - https://github.com/xchwarze/wifi-pineapple-cloner-builds/blob/main/releases/gl-ar750s-universal-sysupgrade.bin    
+
+# Flash OpenWrt to router via Uboot
+
+    Make sure power is off on router
+    Connect PC to router via ethernet using either LAN or WAN port
+    Press and hold Reset button then power on router, holding the Reset button until the 5G LED flashes for the 5th time
+    Manually setup PC to have a static IP of 192.168.1.2
+    Open browser to http://192.168.1.1
+    Upload gl-ar750s-3.0-1011_clean.img
+    Flash and wait 5 minutes before rebooting
+
+    Login into 192.168.1.1
+    System > Backup / Flash Firmware
+    Flash new firmware
+        Upload openwrt-ar750s-3.105.tar
+
+    Manually setup PC to have a static IP pf 192.168.8.2
+    Open browser to https://192.168.8.1
+    Login to verify that upgrade worked  
+
+    Reboot/Reset to get back to Uboot
+    Manually setup PC to have a static IP of 192.168.1.2
+    Open browser to http://192.168.1.1
+    Upload openwrt-19.07.7-ar71xx-generic-gl-ar750s-squashfs-sysupgrade.bin
+    Flash and wait 5 minutes
+    Open browser to http://192.168.1.1
+        should redirect to http://192.168.1.1/cgi-bin/luci/
+    No password required to login
+    System > Administration 
+    Set Router Password
+        AR750SPineapple
+    Save
+
+# Flash Wi-Fi Pineapple Firmware
+
+    Open terminal
+    cd to Downloads
+        cd Downloads
+    copy the Wi-Fi Pineapple firmware to the router
+        scp gl-ar750s-universal-sysupgrade.bin root@192.168.1.1:/tmp
+    # error
+        Unable to negotiate with 192.168.1.1 port 22: no matching host key type found. Their offer: ssh-rsa
+    add -HostkeyAlgorithm argument to previous command
+        scp -oHostKeyAlgorithms=+ssh-rsa gl-ar750s-universal-sysupgrade.bin root@192.168.1.1:/tmp
+    Once image is uploaded, ssh into router
+        ssh -oHostKeyAlgorithms=+ssh-rsa root@192.168.1.1
+    Run sysupgrade to update firmware
+        sysupgrade -n -F /tmp/gl-ar750s-universal-sysupgrade.bin
+    Wait 5 minutes for firmware to flash to router
+    
+
+# Configure Wi-Fi Pineapple
+
+    Manually setup PC to have a static IP pf 172.16.42.1
+        # Set wired connection to Automatic?
+    Open browser to Pineapple panel 
+        http://172.16.42.1:1471/
+    Quickly press Reset/Power button to setup with Wi-Fi disabled (Recommended)
+    Press and hold Reset/Power button for 2 seconds to setup with Wi-Fi enabled
+    Set Root Password
+        AR750SPineapple
+    Management AP
+        SSID: Apate
+        Pass: Apate-AR750SPineapple
+        Hide AP: [x]
+    Open AP 
+        SSID: Open_9B51
+    Filters Configuration
+        Client Filters: Deny Mode
+        SSID Filters: Deny Mode
+        Firewall Settings:
+            Allow SSH Access via WAN []
+            Allow Web Access via WAN []
+    Save
+
+# Format SD card
+
+    Insert SD card
+    Navigate to Advanced
+    Click the dropdown arrow next to USB & Storage 
+    Select Format SD Card
+    
+# Wi-Fi Client Mode
+
+    Navigate to Networking
+    Select wlan2 under Interface
+    Select SSID
+    Enter Password
+    Click Connect
+
+

@@ -2,9 +2,10 @@
 title: Building This Blog
 date: 2023-05-05 12:00:00 -0800 
 categories: [Guide]
-tags: [jekyll,ubuntu]
+tags: [jekyll,ubuntu,github,blog]
 img_path: /assets/img/posts/building-this-blog
 --- 
+![HTML Code](/florian-olivo-unsplash.jpg)
 
 # Hello and Welcome
 
@@ -46,7 +47,7 @@ gem install jekyll bundler
 
 ### VSCode Install on Ubuntu 
 
-Download .deb at https://code.visualstudio.com/download
+Download .deb at <https://code.visualstudio.com/download>
 
 Open a terminal and run the following commands:
 ```bash
@@ -58,15 +59,15 @@ sudo apt install ./FILE.deb   # installs .deb file
 
 These are a few places to find free Jekyll themes and templates:
 
- - https://github.com/topics/jekyll-theme
- - https://jekyllthemes.io/free
- - https://jamstackthemes.dev/#ssg=jekyll
+ - <https://github.com/topics/jekyll-theme>
+ - <https://jekyllthemes.io/free>
+ - <https://jamstackthemes.dev/#ssg=jekyll>
 
 ## Building From a Jekyll Theme
 
 The theme that I chose to build this site from is Chirpy .It seemed like a pretty clean and modern site, has pretty solid documentation, and through the process of getting all of this set up this theme gave me the least issues. You can find it here: 
 
- - https://github.com/cotes2020/chirpy-starter
+ - <https://github.com/cotes2020/chirpy-starter>
             
             
 Make sure you're logged into your Github, navigate to the desired theme repo, select _Use This Template_ or _Fork_
@@ -114,7 +115,7 @@ bundle                # installs dependencies
 bundle exec jekyll s  # launches the site on a local server
 ```
 
-Now the site is running locally on your machine, just open a browser and go to http://127.0.0.1:4000/ to view the site. This is useful for once you start making changes to the site such as posts, layouts, themes, etc. and want to see how changes look before committing to pushing those changes.
+Now the site is running locally on your machine, just open a browser and go to <http://127.0.0.1:4000/> to view the site. This is useful for once you start making changes to the site such as posts, layouts, themes, etc. and want to see how changes look before committing to pushing those changes.
 
 ## Customize Site 
 
@@ -139,7 +140,7 @@ bundle exec jekyll s    # starts local server
 
 The theme that you use may or may not include documentation on adding content to your site that could be specific to your theme, it's worth looking into. I've posted a link to a guide that my theme's author has put together, it may be of some benefit to you.
 
- - https://chirpy.cotes.page/posts/write-a-new-post/
+ - <https://chirpy.cotes.page/posts/write-a-new-post/>
 
 Create a new file in the format of _YYYY-MM-DD-TITLE.md_ and put it in the __posts_ folder of your cloned repository.
 
@@ -196,3 +197,10 @@ After the _git push_ has been ran, wait a couple of minutes for Github to finish
 And that's it! You've now hosted and published your site. Anytime you want to add more posts or make any changes to your site, just make sure all files are saved and re-run that last set of commands; _git status, add, status, commit, push._
 
 ## Thank you and I hope you find this useful!
+
+## References 
+
+- <https://jekyllrb.com/>
+- <https://www.markdownguide.org/>
+- <https://html5up.net/>
+- <https://unsplash.com/>

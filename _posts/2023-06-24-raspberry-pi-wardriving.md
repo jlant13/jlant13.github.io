@@ -2,9 +2,11 @@
 title: Raspberry Pi Wardriving Build
 date: 2023-06-24 12:00:00 -0800 
 categories: [Guide]
-tags: [raspberry-pi,hacking]
+tags: [raspberry-pi,wifi,hacking,hardware,kismet]
 img_path: /assets/img/posts/raspberry-pi-wardriving
 --- 
+
+![Laptop in car](/thisisengineering-unsplash.jpg)
 
 # Wardriving 
 
@@ -28,10 +30,10 @@ I do plan on picking up a small HDMI screen and a folding keyboard as playing ar
 
 ## Software 
  
-- Raspberry Pi Imager (Pi OS Lite 64-bit) - https://www.raspberrypi.com/software/
-- Kismet (Definitely worth giving the Docs a read) - https://www.kismetwireless.net/
-- Aircrack-ng - https://www.aircrack-ng.org/doku.php?id=Main
-- Termius (Used on Android) - https://www.termius.com/
+- Raspberry Pi Imager (Pi OS Lite 64-bit) - <https://www.raspberrypi.com/software/>
+- Kismet (Definitely worth giving the Docs a read) - <https://www.kismetwireless.net/>
+- Aircrack-ng - <https://www.aircrack-ng.org/doku.php?id=Main>
+- Termius (Used on Android) - <https://www.termius.com/>
     
 
 ## Setup
@@ -106,7 +108,7 @@ Unless prompted to reboot, its optional to do so at this point.
 
 When picking out Wi-Fi adapters, it can be pretty useful to know which ones work right out of the box without having to deal with tracking down and installing drivers, but making sure that the adapter can be put into monitor mode is probably the most important aspect. Monitor mode allows the Wi-Fi adapter to listen to all packets that are being sent to other wireless destinations rather than only receive packets intended for itself.
 
-Here is a solid resource on Wi-Fi adapters that work well for this application: https://github.com/morrownr/USB-WiFi
+Here is a solid resource on Wi-Fi adapters that work well for this application: <https://github.com/morrownr/USB-WiFi>
 
 The Wi-Fi adapter that I used for this build didn't require any extra drivers to be installed, it just worked right out of the box. 
 
@@ -150,7 +152,7 @@ Hopefully you won't run into any errors during install, but I ran into a depende
 kismet-core : Depends: libprotobuf17 but it is not installable
 ```
 
-Running sudo apt install libprotobuf17 would result in an error saying that the package was either deprecated or could not be found. So I had to hunt it down. Ended up searching through https://www.debian.org/distrib/packages and found what I was looking for, grabbed the download link, installed the package, and re-ran the kismet install prompt which completed with out issue. 
+Running sudo apt install libprotobuf17 would result in an error saying that the package was either deprecated or could not be found. So I had to hunt it down. Ended up searching through <https://www.debian.org/distrib/packages> and found what I was looking for, grabbed the download link, installed the package, and re-ran the kismet install prompt which completed with out issue. 
 
 If you run into the same issue, here's the commands to download and install the package:
 ```bash
@@ -368,8 +370,8 @@ That's it, you now have a purpose-built headless Raspberry Pi for your wardrivin
 
 ## References
 
-- https://wigle.net/index
-- https://www.busysignal.io/
-- https://www.promiscata.com/
-- https://hackaday.io/project/176358-yaawp-yet-another-automated-wardriving-project
-- https://mikesmodz.wordpress.com/2019/02/13/mobile-wardriving-rig/
+- <https://wigle.net/index>
+- <https://www.busysignal.io/>
+- <https://www.promiscata.com/>
+- <https://hackaday.io/project/176358-yaawp-yet-another-automated-wardriving-project>
+- <https://mikesmodz.wordpress.com/2019/02/13/mobile-wardriving-rig/>

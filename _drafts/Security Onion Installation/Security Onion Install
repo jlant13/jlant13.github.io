@@ -1,0 +1,76 @@
+SECURITY ONION INSTALLATION
+
+    Sections
+        Basic overview of installation 
+            Download ISO: https://securityonionsolutions.com/software
+            Upload ISO to local storage in Proxmox
+            vm102: Athena-SecOnion
+            Disk: 250gb
+            Cores: 6
+            Ram: 32gb/32768mb
+            Network: vmbr0      # uncheck firewall
+                     vmbr1      # uncheck firewall
+            
+            Minimum Specs           # pulled from https://docs.securityonion.net/en/2.3/hardware.html
+                If you just want to import a pcap using so-import-pcap, then you can configure Security Onion 2 as an Import Node with the following minimum specs:
+                    4GB RAM
+                    2 CPU cores
+                    200GB storage
+
+                For all other configurations, the minimum specs for running Security Onion 2 are:
+                    12GB RAM
+                    4 CPU cores
+                    200GB storage
+
+        Boot VM
+            Install SecOnion
+            Destroy all data warning: yes
+            Admin username: athena
+            Admin pass: Influence-Reduction$6810
+            Install
+            Reboot
+            Login with admin creds
+            Standalone      # use arrow keys and tab to move around, space to check boxes, enter to enter
+            AGREE
+            Hostname: athenaseconion
+            Management NIC: eth0
+                Static IP: 10.0.0.50/24
+                DNS Servers: 1.1.1.1,9.9.9.9   
+                DNS Search Domain: searchdomain.local
+                Manager Install: Standard   # manager has internet access
+                                 Direct
+            Monitor NIC: eth1
+                OS Patch Schedule: Automatic
+                Home Networks: 10.0.0.0/8.192.168.0.0/16,172.16.0.0/12
+                Config Type: Basic
+                Metadata Tool: Zeek
+                IDS Ruleset: ETOPEN
+                Optional Services: All
+                Admin email: ekcle47@protonmail.com
+                Admin pass: Ceremony-Ev0lution6810
+                Web Interface Access: IP
+                Sensors Remote Account: soremote // Ceremony-Ev0lution6810
+                Config Type: Basic
+                Zeek Processes: 1
+                Suricata Processes: 1
+                NTP Servers: 0.pool.ntp.org,1.pool.ntp.org
+                Config Type: NODEBASIC 
+            
+            Open browser to MGMT IP [10.0.0.50] and login using admin email
+
+        Create the Tap Port 
+            Proxmox > Shell
+                ip -brie a                  # shows brief IP configs, link state 
+                                            # "tap[VM-102]i0" = mgmt int
+                                            # "tap[VM-102]i1" = monitor int
+                ovs-vsctl -- --id=@p get port tap102i1 -- --id=@m create mirror name=SpanSec select-all=true output-port=@p -- set bridge vmbr1 mirrors=@m
+                                            # must be ran everytime vm is restarted
+                ovs-vsctl list mirror       # confirm port was created 
+        
+        Allow Web Access 
+            SecOnion > Shell
+                sudo so-allow               # select 'a' to set an Analyst IP, enter IP of Charon, creates a firewall rule to allow web access
+                                            # may have already been completed during installation process 
+
+                
+

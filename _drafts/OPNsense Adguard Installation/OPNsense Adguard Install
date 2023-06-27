@@ -1,0 +1,60 @@
+OPNSENSE ADGUARD INSTALLATION
+
+        Adding the Community Repository to OPNsense
+            Login to OPNsense
+            System > Settings > Administration 
+                Enable Secure Shell: [x]
+                Permit Root Login: [x]
+                Permit Password Login: [x]
+                Listen Interfaces: LAN
+                Save 
+            ssh root@10.0.0.1
+            enter option '8' to open shell 
+                fetch -o /usr/local/etc/pkg/repos/mimugmail.conf https://www.routerperformance.net/mimugmail.conf
+                pkg update
+                exit 
+            System > Firmware > Plugins 
+                search for adguard 
+                select the '+' icon to install 
+            Services > Adguardhome > General
+                Enable: [x]
+                Save 
+            Services > Unbound DNS > General 
+                Enable: [ ]                 # Disable Unbound DNS 
+                Save 
+        Initial Setup 
+            Open browser to http://10.0.0.1:3000 
+            Get Started 
+                Admin Web Interface Listen Interface: 10.0.0.1:3000
+                DNS Server Listen Interface: 10.0.0.1:53
+                Username: Helios
+                Password:
+        AdGuard Home Configuration
+            Filters > DNS blocklists
+                Add Blocklist 
+                Choose From List 
+                    OISD Blocklist Basic
+                    Perflyst and Dandelion Sprout's Smart-TV Blocklist
+                    Dandelion Sprout's Anti-Malware List
+                Save 
+            Settings > DNS Settings 
+                Upstream DNS Servers 
+                    https://dns.cloudflare.com/dns-query
+                    tls://1dot1dot1dot1.cloudflare-dns.com
+                    https://dns10.quad9.net/dns-query
+                Bootstrap DNS Servers
+                    1.1.1.1
+                    9.9.9.10
+                    149.112.112.10
+                    2620:fe::10
+                    2620:fe::fe:10
+                Test Upstreams 
+                Apply 
+            Settings > Encryption 
+                Enable Encryption: [x]
+        Configure OPNsense DHCP to use AdGuard
+            Login to OPNsense 
+            Services > DHCPv4 > [LAN]
+                DNS Servers: 10.0.0.1
+                Save
+        
