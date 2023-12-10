@@ -1,8 +1,8 @@
 ---
 title: Building This Blog
 date: 2023-05-05 12:00:00 -0800 
-categories: [Guide]
-tags: [jekyll,ubuntu,github,blog]
+categories: [Blog]
+tags: [guide,jekyll,ubuntu,github,blog]
 img_path: /assets/img/posts/building-this-blog
 --- 
 ![HTML Code](/florian-olivo-unsplash.jpg)

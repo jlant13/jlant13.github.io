@@ -1,8 +1,8 @@
 ---
 title: Raspberry Pi Wardriving Build
 date: 2023-06-24 12:00:00 -0800 
-categories: [Guide]
-tags: [raspberry-pi,wifi,hacking,hardware,kismet]
+categories: [Hacking]
+tags: [guide,raspberry-pi,wifi,hardware,kismet]
 img_path: /assets/img/posts/raspberry-pi-wardriving
 --- 
 
@@ -140,7 +140,7 @@ The main program that this build is built around is Kismet. Kismet is an open so
 The following adds the repository to your sources so that anytime you run sudo update, it will check if Kismet has any updates that can be pulled down. After the repository has been added, do a quick update and install kismet.
 ```bash
 wget -O - https://www.kismetwireless.net/repos/kismet-release.gpg.key --quiet | gpg --dearmor | sudo tee /usr/share/keyrings/kismet-archive-keyring.gpg >/dev/null
-echo 'deb [signed-by=/usr/share/keyrings/kismet-archive-keyring.gpg] https://www.kismetwireless.net/repos/apt/release/buster buster main' | sudo tee /etc/apt/sources.list.d/kismet.list >/dev/null
+echo 'deb [signed-by=/usr/share/keyrings/kismet-archive-keyring.gpg] https://www.kismetwireless.net/repos/apt/release/bullseye bullseye main' | sudo tee /etc/apt/sources.list.d/kismet.list >/dev/null
 sudo apt update
 sudo apt install kismet
 ```

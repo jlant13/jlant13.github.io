@@ -1,8 +1,8 @@
 ---
 title: DIY Wi-Fi Pineapple
 date: 2023-06-27 10:00:00 -0800 
-categories: [Guide]
-tags: [wifi pineapple,wifi,hacking,hardware]
+categories: [Hacking]
+tags: [guide,wifi pineapple,wifi,hacking,hardware]
 img_path: /assets/img/posts/diy-wifi-pineapple
 --- 
 
