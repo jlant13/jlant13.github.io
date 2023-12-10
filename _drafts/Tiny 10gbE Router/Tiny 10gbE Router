@@ -1,0 +1,61 @@
+https://forums.servethehome.com/index.php?threads/lenovo-thinkcentre-thinkstation-tiny-project-tinyminimicro-reference-thread.34925/
+https://www.routerperformance.net/opnsense/mellanox-connecx-management-in-opnsense/
+https://homenetworkguy.com/how-to/configure-wireguard-opnsense/
+
+Parts List
+    Lenovo Thinkcentre m720q/m920q/m90q
+    Lenovo Thinkstation P3x0 (x=3,4,5,6)
+
+
+
+    Lenovo m720q                $115 eBay
+    i3-8100t 4c/4t 
+    8Gb RAM 
+    256GB SSD 
+
+    PCIE Riser Card 01AJ940     $40 eBay - 91bestbargins
+    Rear Bracket    # included with riser card 
+
+    Mellanox CX312B Dual 10Gb SFP+ NIC  $30 eBay
+
+    Passive DAC Twinax Cable    $11 fs.com 
+        Brocade Compatible
+        3ft
+
+
+Sections
+    Migrate to new hardware
+        - have link to section near the top of article 
+    Adguard
+    Wireguard VPN
+    CrowdSec
+    Let's Encrypt
+
+
+Install OPNsense 
+    Boot from ventoy
+    login as installer 
+    reboot
+    open browser to 192.168.1.1
+    config wizard
+    set interface to LAN 
+    finish config wizard 
+    enable ssh on LAN
+    ssh root@192.168.1.1
+    open shell # option 8 
+    vi /boot/loader.conf.local 
+        # add to top of file
+        mlx4en_load="YES"
+        
+        # i to enter insert mode
+        # esc to exit insert mode
+        # :w to save 
+        # :q to exit 
+
+    reboot
+    ssh root@192.168.1.1
+    assign interfaces
+        WAN = em0
+        LAN = mlxen0
+        LAN2 = mlxen1 
+    

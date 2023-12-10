@@ -1,0 +1,182 @@
+Creating a Plex Server in Ubuntu LXC
+
+    iGPU Verification
+        Proxmox Node > Shell 
+            lspci -v | grep -e VGA      
+                # lists VGA compatible controllers
+                # take note of the PCIe address, ex. 00:02.0
+
+            lspci -v -s 00:02.0
+                # lists more info about the device
+
+    Plex LXC Installation
+        Proxmox Node > Shell 
+            Install Plex LXC using Ttecks install script.
+                bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/ct/plex.sh)"
+
+                Create a New Plex LXC:
+                    Yes
+                Default Settings:
+                    Advanced
+                Distrobution: 
+                    Ubuntu
+                Version:
+                    22.04 Jammy
+                Container Type:
+                    Privileged
+                Password:
+                    N0torious-H!erarchy$056
+                Container ID:
+                    108
+                Hostname:
+                    Dionysus-Plex
+                Disk Size:
+                    20GB        # doesn't need a ton of storage as this container is just for plex and not media storage
+                Core Count:
+                    4           # 2-4 is fine to start, if you need more you can allocate more later
+                RAM:
+                    4096MB      # 4GB is fine to start, may need to allocate more 
+                Bridge:
+                    vmbr0
+                IP Address:
+                    10.0.0.8/24 # highly recommend setting a static ip
+                Gateway IP:
+                    10.0.0.1    # ip address of your router 
+                Disable IPv6:
+                    No 
+                MTU Size:
+                    # Leave blank by default 
+                DNS Search Domain:
+                    # Leave blank to use host's settings
+                DNS Server IP:
+                    # Leave blank to use hosts settings 
+                MAC Address:
+                    # Leave blank 
+                VLAN:
+                    # Leave blank
+                Enable SSH:
+                    Yes 
+                Verbose Mode:
+                    No 
+                Create LXC:
+                    Yes 
+                Select Storage: 
+                    # I set mine to my SSD local-lvm 
+                
+                Wait for the script to finish, make sure not to close out of the shell window or terminal session. Once complete there will be a 'Plex should be reachable message'
+
+    LXC Driver Verification
+        In the same terminal, run the following command:
+            ls -l /dev/dri
+                # look for at least one 'renderD' entry
+
+            If you don’t see the above, or see “No such file or directory”, then your Intel iGPU is not enabled properly. Please check your BIOS settings and make sure that Intel Integrated Graphics is enabled and IOMMU is disabled. Make sure the LXC container is turned off, then proceed with the following:
+
+                Proxmox Node > Shell 
+                    nano /etc/pve/lxc/[CONTAINER_ID].conf
+
+                Add the following lines to the bottom of the config file.
+
+                    lxc.cgroup2.devices.allow: c 226:0 rwm
+                    lxc.cgroup2.devices.allow: c 226:128 rwm
+                    lxc.cgroup2.devices.allow: c 29:0 rwm
+                    lxc.mount.entry: /dev/dri dev/dri none bind,optional,create=dir
+                    lxc.mount.entry: /dev/dri/renderD128 dev/renderD128 none bind,optional,create=file
+
+                Now start your container and run ls -l /dev/dri in your container.
+
+    Create Mount Point 
+
+        Shutdown LXC 
+
+        Proxmox > Shell 
+            edit lxc config file 
+                nano /etc/pve/lxc/[CT_ID].conf 
+
+                add the following lines to the bottom of the conf file
+                    mp0: /data/media,mp=/mnt/media
+                        # mp0 being the first configured mount point, increment by 1 for more mount points 
+                        # /data/media is the directory created on host or in my case the zfs pool 
+                        # /mnt/media is where the directory will be found on the LXC filesystem
+                Save 
+        
+        Start Plex LXC 
+
+    Plex Media Configuration
+        With the LXC created and the iGPU has been verified, open up a browser to [LXC_IP]:32400/web
+
+        Sign in or create an account 
+
+        Select 'Got it!' at the 'How Plex Works' screen 
+
+        Name:   # should auto populate
+            dionysus-plex 
+        Allow outside access:   # optional
+            [x]
+        Select Next 
+        
+        Select Add Library
+
+        Library Type:
+            Movies 
+        Name: 
+            Movies 
+        Language:
+            English 
+        Select Next 
+
+        Select Browse for Media Folder
+            /mnt/media/Movies 
+        Select Add Library
+
+        # repeat last steps to add more libraries
+        # once complete, Select Next on the Media Libary page
+
+        Select Done 
+
+        
+    Remote Access Configuration 
+        Login to router
+
+        Firewall > NAT > Port Forward
+
+        Select Add '+'
+
+            Disabled: []
+            No RDR: []
+            Interface: WAN
+            TCP/IP Version: IPv4
+            Protocol: TCP
+            Destination/Invert: []
+            Destination: WAN Address
+            Destination Port Range: 
+                From: 32400
+                To: 32400
+            Redirect Target IP: [PLEX_IP]
+            Redirect Target Port: 32400
+            Pool Options: Default
+            Description: Plex NAT Allow
+            Log: []
+            NAT Reflection: Use System Default
+            Filter Rule Association: Add Associated Filter Rule 
+
+            Save
+
+            Apply Changes
+
+        Open Plex and Open Settings 
+
+        Settings > Remote Access
+            Manually Specify Public Port: [x] 32400
+            Select Retry
+
+        Set Upload Speed
+            Run a speed test at speedtest.net
+
+            Using the result of the upload test, paste into the upload speed on Plex
+
+    Accepting Invite
+        https://www.youtube.com/watch?v=lNGAvH2TPbQ
+        
+
+        

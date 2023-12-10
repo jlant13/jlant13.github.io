@@ -1,0 +1,170 @@
+Creating a File Server using LXC and Cockpit
+
+    Download/Creating the LXC 
+        Open up Node > local > CT Templates
+
+        Select Templates, Select debian-12-standard, and Download
+
+        Once the LXC template has finished downloading, click the Create CT button in the top right corner of the webui 
+
+            General:
+                CT ID: 107 
+                Hostname: DebianNAS
+                Unprivileged: [x]
+                Password: Significant-Bi0sphere$265
+
+            Template:
+                Storage: Local 
+                Template: debian-12-standard 
+
+            Disks
+                Storage: local-lvm      # set to SSD rather than data pool
+                Disk Size: 8GB
+
+            CPU: 
+                Cores: 2 
+
+            Memory: 
+                Memory: 1024MB
+                Swap: 1024MB
+
+            Network: 
+                Name: eth0
+                Bridge: vmbr0
+                IPV4: Static
+                IPv4 IP: 10.0.0.3/24
+                Gateway: 10.0.0.1
+
+            DNS:
+                DNS Domain: use host settings
+                DNS Servers: use host settings 
+
+            Confirm/Finish 
+
+        Once the LXC has finished building start the LXC 
+
+        Open up the console and login 
+            user: root
+            pass: password set during install
+
+    
+    Installing Cockpit 
+        update debian
+            apt update && apt full-upgrade
+
+        install cockpit
+            apt install --no-install-recommends cockpit -y
+
+        Allow root access to connect to webui, temporarily
+            nano /etc/cockpit/disallowed-users
+
+            # root          # find and comment out root user
+
+        Open browser to [LXC_IP]:9090 
+            login in using LXC credentials
+
+    Installing Cockpit File Sharing Modules
+        #Download Cockpit File Sharing
+        wget https://github.com/45Drives/cockpit-file-sharing/releases/download/v3.3.4/cockpit-file-sharing_3.3.4-1focal_all.deb
+        #Download Cockpit Navitator
+        wget https://github.com/45Drives/cockpit-navigator/releases/download/v0.5.10/cockpit-navigator_0.5.10-1focal_all.deb
+        #Download Cockpit Identities
+        wget https://github.com/45Drives/cockpit-identities/releases/download/v0.1.12/cockpit-identities_0.1.12-1focal_all.deb
+        #Install them
+        apt install ./*.deb
+        #It will complain about being unable to delete the deb files, so we will do that now
+        rm ./*.deb
+
+    Shutdown LXC
+
+    Create Mount Point
+        Node > Shell 
+            mkdir /data/media         # /data is my zfs pool 
+
+        edit lxc config file 
+            nano /etc/pve/lxc/[CT_ID].conf 
+
+            add the following lines to the bottom of the conf file
+                mp0: /data/media,mp=/mnt/media
+                    # mp0 being the first configured mount point, increment by 1 for more mount points 
+                    # /data/media is the directory created on host or in my case the zfs pool 
+                    # /mnt/media is where the directory will be found on the LXC filesystem 
+
+                # uid map: from uid 0 map 1005 uids (in the ct) to the range starting 100000 (on the host), so 0..1004 (ct) → 100000..101004 (host)
+                lxc.idmap = u 0 100000 1005
+                lxc.idmap = g 0 100000 1005
+                # we map 1 uid starting from uid 1005 onto 1005, so 1005 → 1005
+                lxc.idmap = u 1005 1005 1
+                lxc.idmap = g 1005 1005 1
+                # we map the rest of 65535 from 1006 upto 101006, so 1006..65535 → 101006..165535
+                lxc.idmap = u 1006 101006 64530
+                lxc.idmap = g 1006 101006 64530
+                
+            Save
+
+        edit the subuid config file 
+            nano /etc/subuid
+
+            add the following lines:  
+                root:1005:1
+            
+            Save
+        
+        edit the subgid config file: 
+            nano /etc/subgid
+
+            add the following lines:
+                root:1005:1
+            
+            Save 
+
+        set permissions 
+            chown -R 1005:1005 /data/media
+     
+    User Management
+        start LXC
+
+        Open browser to [LXC_IP]:9090
+
+        Identities > Users > Group
+            # Click the "+" icon to create a new group
+
+            Group Name: share
+
+        Identities > Users > New User
+            Name: jlant
+            Home Dir: /home/jlant
+            Login Shell: Bash /bin/bash     # no login removes the ability for that user to login, not recommended 
+            Groups: root, share
+            Pass:
+            Samba Pass: 
+
+    Samba Shares
+        Open the Terminal either on Cockpit, in Proxmox, or SSH into the LXC
+            edit the samba config file
+                nano /etc/samba/smb.conf
+
+                add the following lines to the bottom of the file:
+                    [media]
+                        comment = DebianNAS Samba Share
+                        path = /mnt/media
+                        read only = no
+                        writeable = yes
+                        browseable = yes
+
+                    # may have to delete the printer sections.
+                Save
+            restart samba services, always restart services after editing smb.conf
+                service smbd restart
+
+        File Sharing > Samba 
+            Import config from /etc/samba/smb.conf
+                select YES
+
+        Open up File Explorer
+            Linux Client:
+                Files > Other Locations > smb://[LXC_IP]/
+            Windows Client: 
+                This PC > Computer > Map Network Drive > \\[LXC_IP]
+
+         
