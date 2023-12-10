@@ -138,13 +138,13 @@ To start, the Mellanox card is disabled by default and won't allow it's interfac
 
 Open up the _System_ tab and select _Settings_ then select _Administration_
 
-![Settings Tab](/Tiny10GBRouter18.jpg)
+![Settings Tab](/Tiny10GBRouter18.png)
 _System > Settings > Administration_ 
 
 
 Scroll down to the _Secure Shell_ section and enable SSH with the following default settings. _Please note that these default settings may not be the most secure settings for long term use and you may change these settings once finished enabling the interfaces_
 
-![Secure Shell](/Tiny10GBRouter19.jpg)
+![Secure Shell](/Tiny10GBRouter19.png)
 _SSH Settings_
 
 
